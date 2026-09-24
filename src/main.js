@@ -15,9 +15,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { mountFeatures } from './app/mount.js';
 import { createStage } from './app/stage.js';
 import { pageChapters } from './app/chapters.js';
-import { prefersReducedMotion, registerMotion, initSmoothScroll } from './shared/lib/motion.js';
+import { prefersReducedMotion, registerMotion, initSmoothScroll, scrollToTarget } from './shared/lib/motion.js';
 
 import * as cursor from './features/cursor/cursor.js';
+import * as nav from './features/nav/nav.js';
 import * as hud from './features/hud/hud.js';
 import * as hero from './features/hero/hero.js';
 import * as formFields from './features/form-fields/form-fields.js';
@@ -30,6 +31,7 @@ import * as footer from './features/footer/footer.js';
 // Keys match the data-mount attributes in index.html.
 mountFeatures({
   'cursor': cursor,
+  'nav': nav,
   'hud': hud,
   'hero': hero,
   'form-fields': formFields,
@@ -42,6 +44,8 @@ mountFeatures({
 
 // Content that must work with or without motion.
 var hudApi = hud.initHud();
+var navApi = nav.initNav();
+navApi.onToggle(hudApi.refresh);   // the header is re-inked over the open menu, and after it
 var tabs = featureShowcase.initFeatureTabs();
 
 // No motion wanted: the chapters stay in normal flow, one full screen each,
@@ -67,7 +71,9 @@ if (prefersReducedMotion) {
       closing: closing.initClosing(),
       footer: footer.initFooter()
     }),
-    scrollTo: function (y, immediate) { lenis.scrollTo(y, { immediate: !!immediate }); }
+    // An immediate scroll is the stage keeping the reader in place across a
+    // rebuild, so it goes through even while the menu holds the page still.
+    scrollTo: function (y, immediate) { lenis.scrollTo(y, { immediate: !!immediate, force: !!immediate }); }
   });
 
   var cur = cursor.initCursor();
@@ -77,6 +83,10 @@ if (prefersReducedMotion) {
     cursor: cur
   });
 
+  // The open menu holds the page still. Its links land on the moment their
+  // chapter has arrived, with none of the story between played on the way.
+  navApi.onToggle(function (open) { if (open) lenis.stop(); else lenis.start(); });
+  navApi.setJump(function (target) { scrollToTarget(lenis, stage.scrollFor, target, true); });
   hudApi.setOverlay(stage.groundAt);
   ScrollTrigger.refresh();
 

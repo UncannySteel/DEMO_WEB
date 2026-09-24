@@ -36,6 +36,11 @@ with every state already shown.
 A chapter taller than the screen (phones, short laptops) is not cut off: its
 overflow scrolls up inside its sheet, on the timeline, before it leaves.
 
+The nav is the exception to all that scrolling. The menu's links (and the
+mark and wordmark) carry `data-jump`: they land on the moment their chapter
+has arrived in a single step, behind the still-open menu, so none of the story
+between is played on the way. Other in-page links still scroll through it.
+
 ## Structure
 
 ```
@@ -68,6 +73,7 @@ src/
       gl.js                 context, shader programs, matrices
   features/
     cursor/                 custom cursor (ring, drag hand)
+    nav/                    the spine (a rail down the left; a bar on phones) and the chapter menu
     hud/                    fixed header, chapter label, scroll progress
     hero/                   CH 00 — "We're hiring", struck through, crumpled → "well… we are not."
     form-fields/            CH 01 — the eleven fields + tally
@@ -98,10 +104,12 @@ adds its own animation once it has arrived and returns how long that takes.
 - **Copy / text**: the feature's `.html` file. Feature-tab cards other than
   "Autofill" live in `feature-showcase/features.data.js`.
 - **Colours / fonts**: `src/shared/styles/tokens.css`.
+- **Menu groups and links**: `src/features/nav/nav.html`. Each link's `href` is
+  a chapter's id; keep `data-jump` on it so it jumps rather than scrolls.
 - **Pacing, order, or which transition joins two chapters**: `src/app/chapters.js`.
   Durations are in screens of scrolling.
 - **Add a section**: create `src/features/<name>/` with the three files (give
   the section `class="layer"` and wrap its content in `<div class="ch__body">`),
   add `<div data-mount="<name>"></div>` inside `<main>` in `index.html`, register
   it in `mountFeatures({...})` in `src/main.js`, and add it to `pageChapters()`
-  with the transition that brings it on.
+  with the transition that brings it on. Give it an id and a link in the menu.

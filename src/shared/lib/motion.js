@@ -25,15 +25,24 @@ export function initSmoothScroll(resolve) {
   // feature-swap spin. Bounded smoothing treats any frame over 500ms as
   // 33ms, so a hitch pauses the animation instead of skipping it.
   gsap.ticker.lagSmoothing(500, 33);
-  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+  // Jump links (data-jump) skip the scroll altogether: features/nav.
+  document.querySelectorAll('a[href^="#"]:not([data-jump])').forEach(function (a) {
     a.addEventListener('click', function (e) {
       var target = document.querySelector(a.getAttribute('href'));
       if (!target) return;
       e.preventDefault();
-      var y = resolve ? resolve(target) : null;
-      if (y == null) lenis.scrollTo(target, { offset: -10 });
-      else lenis.scrollTo(y);
+      scrollToTarget(lenis, resolve, target);
     });
   });
   return lenis;
+}
+
+/* Scrolls to where `target` is shown — through `resolve` when it knows (the
+   stage), else to the element itself. `immediate` lands in one step, even
+   while scrolling is held (the open menu). */
+export function scrollToTarget(lenis, resolve, target, immediate) {
+  var y = resolve ? resolve(target) : null;
+  var opts = { immediate: !!immediate, force: !!immediate };
+  if (y == null) lenis.scrollTo(target, Object.assign({ offset: -10 }, opts));
+  else lenis.scrollTo(y, opts);
 }

@@ -35,6 +35,36 @@ export function cover(opts) {
   };
 }
 
+/* Borrowed from grail-app.com: the sheet on top falls behind the scroll —
+   sinking and drifting down — while a soft circular vignette closes in on
+   it, and the next chapter, already in place underneath, comes up out of
+   the dark to meet you. The vignette is a mask driven by `--iris` (see
+   stage.css). */
+export function iris(opts) {
+  opts = opts || {};
+  var dur = opts.duration || 1.2;
+  return {
+    duration: dur,
+    reveal: 0.45,
+    build: function (tl, from, to, at) {
+      from.el.classList.add('layer--iris');
+      tl.set(from.el, { zIndex: 3 }, at);
+      tl.set(to.el, { opacity: 1, pointerEvents: 'auto', zIndex: 2 }, at);
+      tl.fromTo(from.el, { yPercent: 0, scale: 1 },
+        { yPercent: 45, scale: 0.9, duration: dur, ease: 'power1.in', immediateRender: false }, at);
+      // Its own ease: already closing mid-way, and shut just before the end,
+      // so no smudge of the old sheet is left over the new one.
+      tl.fromTo(from.el, { '--iris': 0 },
+        { '--iris': 1, duration: dur * 0.9, ease: 'sine.inOut', immediateRender: false }, at);
+      tl.fromTo(to.el, { scale: 1.06 },
+        { scale: 1, duration: dur, ease: 'power2.out', immediateRender: false }, at);
+      tl.fromTo(to.veil, { opacity: 0.55 }, { opacity: 0, duration: dur, ease: 'power1.out' }, at);
+      tl.set(from.el, { opacity: 0, pointerEvents: 'none' }, at + dur);
+      return dur;
+    }
+  };
+}
+
 /* The sheet on top is lifted away, uncovering the next one, which rises a
    touch into place from underneath as the light reaches it. */
 export function curtain(opts) {

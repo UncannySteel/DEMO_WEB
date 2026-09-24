@@ -23,9 +23,12 @@ async function seek(page, t) {
   }), t);
 }
 
+// The hero's sign is crumpled from 0.55 to 1.85 screens in (features/hero).
+const CRUMPLE_MID = 0.55 + 1.3 * 0.4;
+
 const handOff = page => page.evaluate(() => ({
   canvas: getComputedStyle(document.querySelector('canvas.fx')).visibility,
-  form: getComputedStyle(document.getElementById('form')).visibility
+  sign: getComputedStyle(document.getElementById('signLayer')).visibility
 }));
 
 test.describe('stage', () => {
@@ -70,37 +73,99 @@ test.describe('stage', () => {
     await boot(page);
     const i = await info(page);
     test.skip(!i.webgl, 'no WebGL in this browser');
-    const how = chapter(i, 'how'), form = chapter(i, 'form');
-    await seek(page, how.start + (form.end - how.start) * 0.4);
-    expect(await handOff(page)).toEqual({ canvas: 'visible', form: 'hidden' });
-    await seek(page, how.start - 0.05);
-    expect(await handOff(page)).toEqual({ canvas: 'hidden', form: 'visible' });
+    await seek(page, CRUMPLE_MID);
+    expect(await handOff(page)).toEqual({ canvas: 'visible', sign: 'hidden' });
+    await seek(page, 0.3);
+    expect(await handOff(page)).toEqual({ canvas: 'hidden', sign: 'visible' });
   });
 
   test('a lost WebGL context drops to the CSS crumple mid-exit', async ({ page }) => {
     await boot(page);
     const i = await info(page);
     test.skip(!i.webgl, 'no WebGL in this browser');
-    const how = chapter(i, 'how'), form = chapter(i, 'form');
-    await seek(page, how.start + (form.end - how.start) * 0.4);
+    await seek(page, CRUMPLE_MID);
     await page.evaluate(() => {
       const c = document.querySelector('canvas.fx');
       const gl = c.getContext('webgl2') || c.getContext('webgl');
       gl.getExtension('WEBGL_lose_context').loseContext();
     });
     await expect.poll(() => page.evaluate(() => {
-      const s = getComputedStyle(document.getElementById('form'));
+      const s = getComputedStyle(document.getElementById('signLayer'));
       return s.visibility === 'visible' && s.clipPath.startsWith('polygon') && s.transform !== 'none';
     })).toBe(true);
   });
 
-  test('header nav links land on their chapter', async ({ page, isMobile }) => {
-    test.skip(isMobile, 'the header nav is hidden on narrow screens');
+  // The form sinks away through a closing vignette onto the features, which
+  // are already in place underneath — and it all plays back when scrolled up.
+  test('the form sinks through the iris onto the features', async ({ page }) => {
     await boot(page);
-    await page.click('.hud__nav a[href="#price"]');
+    const i = await info(page);
+    const how = chapter(i, 'how'), form = chapter(i, 'form');
+    const state = () => page.evaluate(() => {
+      const f = getComputedStyle(document.getElementById('form'));
+      return {
+        iris: parseFloat(f.getPropertyValue('--iris')),
+        mask: (f.maskImage || f.webkitMaskImage).startsWith('radial-gradient'),
+        form: f.opacity,
+        how: getComputedStyle(document.getElementById('how')).opacity
+      };
+    });
+    await seek(page, how.start + (form.end - how.start) * 0.5);
+    const mid = await state();
+    expect(mid.iris).toBeGreaterThan(0.2);
+    expect(mid.iris).toBeLessThan(0.8);
+    expect(mid).toMatchObject({ mask: true, form: '1', how: '1' });
+    await seek(page, form.end + 0.02);
+    expect(await state()).toMatchObject({ form: '0', how: '1' });
+    await seek(page, how.start - 0.05);
+    expect(await state()).toMatchObject({ iris: 0, form: '1', how: '0' });
+  });
+
+  // A menu link lands on the moment its chapter has arrived, in one step:
+  // none of the story between is scrolled through on the way.
+  test('menu links jump straight to their chapter', async ({ page, isMobile }) => {
+    await boot(page);
+    const i = await info(page);
+    const press = sel => isMobile ? page.tap(sel) : page.click(sel);
+    for (const [href, id, label] of [['#price', 'price', '04 — Pricing'], ['#form', 'form', '01 — The form'], ['#close', 'close', '05 — Get hired'], ['#top', 'hero', '00 — Now hiring']]) {
+      await press('#burger');
+      await expect(page.locator('#siteMenu')).toHaveClass(/is-open/);
+      await page.evaluate(() => { window.__ys = []; addEventListener('scroll', window.__rec = () => window.__ys.push(Math.round(scrollY))); });
+      await press(`#siteMenu a[href="${href}"]`);
+      await expect.poll(() => page.textContent('#chapterLabel')).toBe(label);
+      await expect(page.locator('#siteMenu')).not.toHaveClass(/is-open/);
+      const ys = await page.evaluate(() => { removeEventListener('scroll', window.__rec); return [...new Set(window.__ys)]; });
+      expect(ys.length).toBeLessThanOrEqual(1);
+      expect(Math.abs(await page.evaluate(() => scrollY) - Math.round(i.top + chapter(i, id).arrive * i.unit))).toBeLessThanOrEqual(1);
+    }
+  });
+
+  // Every other in-page link still scrolls there, through the story.
+  test('in-page links still scroll to their chapter', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the footer links sit in its overflow on a phone');
+    await boot(page);
+    await seek(page, chapter(await info(page), 'foot').arrive + 0.05);
+    await page.click('.foot a[href="#price"]');
     await expect.poll(() => page.textContent('#chapterLabel'), { timeout: 15000 }).toBe('04 — Pricing');
-    await page.click('.hud__nav a[href="#form"]');
-    await expect.poll(() => page.textContent('#chapterLabel'), { timeout: 15000 }).toBe('01 — The form');
+  });
+
+  test('the open menu holds the page still, and Escape gives it back', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'wheel and keys');
+    await boot(page);
+    await seek(page, chapter(await info(page), 'form').arrive);
+    const y = await page.evaluate(() => scrollY);
+    await page.click('#burger');
+    await expect(page.locator('#burger')).toHaveAttribute('aria-expanded', 'true');
+    await page.mouse.move(700, 450);
+    await page.mouse.wheel(0, 800);
+    await page.keyboard.press('PageDown');
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => scrollY)).toBe(y);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#siteMenu')).not.toHaveClass(/is-open/);
+    await expect(page.locator('#burger')).toBeFocused();
+    await page.mouse.wheel(0, 800);
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(y);
   });
 
   // The swap happens mid-spin, on the animation clock: allow for a software
@@ -174,5 +239,14 @@ test.describe('reduced motion', () => {
     await page.click('#tab-storage');
     await expect(page.locator('#featDesc')).toContainText('Your profile stays in your browser');
     expect(errors).toEqual([]);
+  });
+
+  test('the menu still opens, and its links are plain anchors', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#burger');
+    await expect(page.locator('#siteMenu')).toHaveClass(/is-open/);
+    await page.click('#siteMenu a[href="#price"]');
+    await expect(page.locator('#siteMenu')).not.toHaveClass(/is-open/);
+    await expect.poll(() => page.evaluate(() => Math.round(document.getElementById('price').getBoundingClientRect().top))).toBe(0);
   });
 });

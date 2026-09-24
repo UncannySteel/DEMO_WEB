@@ -1,5 +1,5 @@
-import { cover, curtain } from '../shared/transitions/sheets.js';
-import { crumple, curl } from '../shared/transitions/paper.js';
+import { cover, curtain, iris } from '../shared/transitions/sheets.js';
+import { curl } from '../shared/transitions/paper.js';
 import { blot } from '../shared/transitions/blot.js';
 
 /* ===========================================================================
@@ -11,7 +11,7 @@ import { blot } from '../shared/transitions/blot.js';
 
    The one idea running through all of it: the page is a stack of paper.
    Sheets are dealt over each other, torn, crumpled up and thrown away,
-   peeled back, and finally soaked through with ink.
+   sunk out of sight, peeled back, and finally soaked through with ink.
    =========================================================================== */
 export function pageChapters(scenes) {
   function chapter(el, transition, scene, extra) {
@@ -26,10 +26,8 @@ export function pageChapters(scenes) {
     // 01 — the form is dealt over the correction.
     chapter(byId('form'), cover({ duration: 1 }), scenes.form),
 
-    // 02 — …and is screwed up and thrown away, uncovering the features.
-    chapter(byId('how'), crumple({
-      duration: 1.4, toss: [-0.9, -0.35], spin: -1, seed: 11.3, priority: 1
-    }), scenes.features),
+    // 02 — …and sinks away through a closing vignette onto the features.
+    chapter(byId('how'), iris({ duration: 1.2 }), scenes.features),
 
     // 02 — a torn-off sheet: the demo, typing itself.
     chapter(byId('watch'), cover({ duration: 1, torn: true, sink: 1.5 }), scenes.demo),

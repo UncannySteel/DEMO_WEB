@@ -5,7 +5,9 @@ export { markup };
 
 /* --- chapter label + scroll progress (works with or without GSAP) ------ */
 export function initHud() {
-  var hudEl = document.querySelector('.hud');
+  // The header row: the header, and anything else sharing it (the nav's
+  // bar on phones), all take the same ink.
+  var topEls = document.querySelectorAll('.hud, [data-header-row]');
   var hudFootEl = document.querySelector('.hud-foot');
 
   // Both questions — what ground is under the header, which chapter is on
@@ -14,8 +16,10 @@ export function initHud() {
   // every chapter sits at the same place and only the one on top counts.
   // (clip-path and visibility clip hit-testing too, so a sheet that is
   // mid-exit answers only where it is still drawn.)
-  function closestAt(y, attr) {
-    var stack = document.elementsFromPoint(Math.round(window.innerWidth / 2), y);
+  function stackAt(y) {
+    return document.elementsFromPoint(Math.round(window.innerWidth / 2), y);
+  }
+  function closestIn(stack, attr) {
     for (var i = 0; i < stack.length; i++) {
       var g = stack[i].closest && stack[i].closest('[' + attr + ']');
       if (g) return g.getAttribute(attr);
@@ -23,14 +27,18 @@ export function initHud() {
     return null;
   }
   // Effects painted in WebGL are not in the DOM to be hit-tested; the stage
-  // answers for them when it is running (see setOverlay below).
+  // answers for them when it is running (see setOverlay below). Something
+  // covering the whole page (data-cover: the open menu) is above those too.
   var overlay = null;
   function groundAt(y) {
-    var g = overlay && overlay(Math.round(window.innerWidth / 2), y);
-    return g || closestAt(y, 'data-ground') || 'ink';
+    var stack = stackAt(y);
+    return closestIn(stack, 'data-cover') ||
+      (overlay && overlay(Math.round(window.innerWidth / 2), y)) ||
+      closestIn(stack, 'data-ground') || 'ink';
   }
   function paintHud() {
-    hudEl.dataset.hud = groundAt(26) === 'ink' ? 'light' : 'dark';
+    var top = groundAt(26) === 'ink' ? 'light' : 'dark';
+    topEls.forEach(function (el) { el.dataset.hud = top; });
     hudFootEl.dataset.hud = groundAt(window.innerHeight - 26) === 'ink' ? 'light' : 'dark';
   }
 
@@ -45,7 +53,7 @@ export function initHud() {
     barEl.style.width = (p * 100).toFixed(1) + '%';
     pctEl.textContent = String(Math.round(p * 100)).padStart(2, '0');
 
-    var current = closestAt(Math.round(window.innerHeight * 0.55), 'data-chapter');
+    var current = closestIn(stackAt(Math.round(window.innerHeight * 0.55)), 'data-chapter');
     if (current && labelEl.textContent !== current) labelEl.textContent = current;
     paintHud();
   }

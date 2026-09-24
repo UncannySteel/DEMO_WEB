@@ -41,4 +41,14 @@
   --sheet-top:clamp(76px,11vh,118px);
   --sheet-bottom:clamp(60px,9vh,96px);
   --tear:24px;            /* depth of a torn sheet's ragged edge */
+
+  /* The header row, and the nav spine beside it (features/nav). From 768px
+     the spine is a rail down the left edge, and the page, the header and
+     the chapter bar all make room for it. Below that it is a bar sharing
+     the header row, with its mark and menu button at either end. */
+  --bar:70px;             /* height of the header row */
+  --spine:0px;            /* width of the rail */
+  --spine-inset:44px;     /* room kept at each end of the header row for the bar's mark and button */
 }
+@media(min-width:768px){:root{--spine:64px;--spine-inset:0px}}
+@media(min-width:1024px){:root{--spine:72px}}
