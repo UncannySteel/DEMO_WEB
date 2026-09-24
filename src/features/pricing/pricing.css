@@ -1,0 +1,37 @@
+/* ===========================================================================
+   CH 04 — pricing
+   Vertical rhythm is capped by the viewport's height as well as its width,
+   so both plans sit in one screen on a laptop instead of spilling over.
+   =========================================================================== */
+.price__title{font-size:clamp(2.2rem,min(6.2vw,9vh),5.6rem)}
+
+.plans{display:grid;grid-template-columns:1fr;gap:0;margin-top:8px}
+@media(min-width:840px){.plans{grid-template-columns:1fr 1fr}}
+.plan{
+  padding:clamp(18px,min(3vw,3.4vh),40px) 0;border-top:var(--rule) solid var(--bone-line);
+  display:flex;flex-direction:column;
+}
+@media(min-width:840px){
+  .plan{padding:clamp(18px,min(3vw,3.4vh),40px) clamp(26px,3.4vw,52px)}
+  .plan:first-child{padding-left:0}
+  .plan:last-child{padding-right:0;border-left:var(--rule) solid var(--bone-line)}
+}
+.plan__k{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.plan__badge{
+  font-size:9px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;
+  background:var(--ink);color:var(--citrine);border-radius:999px;padding:5px 11px;
+}
+.plan__price{
+  font-family:var(--display);font-stretch:62%;font-weight:650;
+  font-size:clamp(3.4rem,min(10vw,13vh),8rem);line-height:0.78;letter-spacing:-0.045em;
+  margin:clamp(12px,2.4vh,22px) 0 4px;font-variant-numeric:tabular-nums;
+}
+.plan__per{font-size:12px;color:var(--ash-deep);letter-spacing:0.04em}
+.plan__list{list-style:none;margin:clamp(12px,3vh,28px) 0 0;padding:0;flex:1;display:grid;gap:0}
+.plan__list li{
+  display:flex;gap:11px;align-items:baseline;font-size:14px;line-height:1.5;
+  padding:clamp(6px,1.25vh,10px) 0;border-bottom:var(--rule) solid var(--bone-line);color:var(--ink);
+}
+.plan__list li:last-child{border-bottom:0}
+.plan__list .tick{color:var(--citrine-deep);font-size:11px;flex:none}
+.plan .btn{margin-top:clamp(14px,2.8vh,26px);justify-content:center}

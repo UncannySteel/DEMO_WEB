@@ -1,0 +1,10 @@
+/* ===========================================================================
+   CH 05 — closing band
+   =========================================================================== */
+.close{position:relative;background:var(--citrine);color:var(--ink)}
+.close__title{font-size:clamp(4rem,min(19vw,34vh),18rem);margin:14px 0 0}
+.close__row{
+  display:flex;flex-wrap:wrap;gap:18px 34px;align-items:center;
+  margin-top:clamp(28px,4.5vh,50px);
+}
+.close__fine{font-size:13px;color:#4A5720;max-width:40ch}
