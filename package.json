@@ -1,0 +1,20 @@
+{
+  "name": "onextap-landing",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "gsap": "3.12.5",
+    "lenis": "1.1.18"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "vite": "^7.0.0"
+  }
+}
