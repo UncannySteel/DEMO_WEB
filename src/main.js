@@ -28,6 +28,8 @@ import * as jobBoards from './features/job-boards/job-boards.js';
 import * as pricing from './features/pricing/pricing.js';
 import * as closing from './features/closing/closing.js';
 import * as footer from './features/footer/footer.js';
+import * as faq from './features/faq/faq.js';
+import * as login from './features/login/login.js';
 
 // Keys match the data-mount attributes in index.html.
 mountFeatures({
@@ -40,7 +42,9 @@ mountFeatures({
   'job-boards': jobBoards,
   'pricing': pricing,
   'closing': closing,
-  'footer': footer
+  'footer': footer,
+  'faq': faq,
+  'login': login
 });
 
 // Content that must work with or without motion.
@@ -48,6 +52,7 @@ var hudApi = hud.initHud();
 var navApi = nav.initNav();
 navApi.onToggle(hudApi.refresh);   // the header is re-inked over the open menu, and after it
 var tabs = featureShowcase.initFeatureTabs();
+var windows = [faq.initFaq(), login.initLogin()];
 
 // No motion wanted: the chapters stay in normal flow, one full screen each,
 // with every state already shown (the .no-motion rules), and we stop.
@@ -94,7 +99,10 @@ if (prefersReducedMotion) {
     lenis.resize();
     scrollToTarget(lenis, stage.scrollFor, target, true);
   };
-  navApi.onToggle(function (open) { if (open) lenis.stop(); else lenis.start(); });
+  // So does an open window (the FAQ, sign-in).
+  var hold = function (open) { if (open) lenis.stop(); else lenis.start(); };
+  navApi.onToggle(hold);
+  windows.forEach(function (w) { w.onToggle(hold); });
   navApi.setJump(jumpTo);
   hudApi.setOverlay(stage.groundAt);
   ScrollTrigger.refresh();

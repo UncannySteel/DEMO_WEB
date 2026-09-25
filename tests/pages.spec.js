@@ -193,7 +193,7 @@ test.describe('the feedback window', () => {
     const state = await page.evaluate(() => ({
       focusIn: document.getElementById('feedback').contains(document.activeElement),
       behind: [...document.body.children].filter(el => el.id !== 'feedback' && el.tagName !== 'SCRIPT').every(el => el.inert),
-      held: document.documentElement.classList.contains('fb-open'),
+      held: document.documentElement.classList.contains('dlg-open'),
       z: +getComputedStyle(document.getElementById('feedback')).zIndex
     }));
     expect(state).toEqual({ focusIn: true, behind: true, held: true, z: 80 });
@@ -210,17 +210,18 @@ test.describe('the feedback window', () => {
       await expect(fb(page)).not.toHaveClass(/is-open/);
       await expect(page.locator('.sub-hero [data-feedback]')).toBeFocused();
     } else {
-      await page.tap('.fb__x');
+      await page.tap('#feedback .dlg__x');
       await expect(fb(page)).not.toHaveClass(/is-open/);
     }
-    expect(await page.evaluate(() => [...document.body.children].some(el => el.id !== 'feedback' && el.id !== 'siteMenu' && el.inert))).toBe(false);
+    expect(await page.evaluate(() => [...document.body.children].some(el => !el.classList.contains('dlg') && el.id !== 'siteMenu' && el.inert))).toBe(false);
     expect(await page.evaluate(() => document.getElementById('siteMenu').inert)).toBe(true);   // the closed menu stays inert
+    expect(await page.evaluate(() => document.getElementById('login').inert)).toBe(true);      // and so does the closed sign-in window
     expect(errors).toEqual([]);
   });
 
   test('closes from the ×, Cancel, and a click outside it', async ({ page, isMobile }) => {
     await openPage(page, '/contact/');
-    for (const closer of ['.fb__x', '.fb__actions [data-fb-close]', 'scrim']) {
+    for (const closer of ['#feedback .dlg__x', '.fb__actions [data-dlg-close]', 'scrim']) {
       await page.evaluate(() => document.querySelector('.sub-hero [data-feedback]').click());
       await expect(fb(page)).toHaveClass(/is-open/);
       if (closer === 'scrim') await page.mouse.click(5, 300);
@@ -266,7 +267,7 @@ test.describe('the feedback window', () => {
     expect(notes[0]).toMatchObject({ kind: 'board', email: 'reader@example.com', page: '/contact/' });
 
     // Closed and opened again, it starts fresh.
-    await press(page, isMobile, '#fbDone [data-fb-close]');
+    await press(page, isMobile, '#fbDone [data-dlg-close]');
     await expect(fb(page)).not.toHaveClass(/is-open/);
     await press(page, isMobile, '.sub-hero [data-feedback]');
     await expect(page.locator('#fbForm')).toBeVisible();

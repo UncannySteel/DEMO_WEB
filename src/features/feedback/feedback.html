@@ -1,19 +1,20 @@
 <!-- The feedback window (Contact). Any [data-feedback] button opens it; it
-     is dressed as the demo form's browser window. Closed, it is inert and
-     out of sight; open, everything behind it is inert instead. -->
-<div class="fb" id="feedback" data-lenis-prevent inert>
-  <div class="fb__scrim" data-fb-close></div>
+     is dressed as the demo form's browser window (shared/styles/dialog.css).
+     Closed, it is inert and out of sight; open, everything behind it is
+     inert instead. -->
+<div class="dlg fb" id="feedback" data-lenis-prevent inert>
+  <div class="dlg__scrim" data-dlg-close></div>
 
-  <div class="fb__win" role="dialog" aria-modal="true" aria-labelledby="fbTitle" aria-describedby="fbIntro">
-    <div class="fb__bar">
-      <span class="fb__dots" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span class="fb__url" aria-hidden="true">onextap / contact / feedback</span>
-      <button class="fb__x" type="button" data-fb-close aria-label="Close feedback">
+  <div class="dlg__win" role="dialog" aria-modal="true" aria-labelledby="fbTitle" aria-describedby="fbIntro">
+    <div class="dlg__bar">
+      <span class="dlg__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="dlg__url" aria-hidden="true">onextap / contact / feedback</span>
+      <button class="dlg__x" type="button" data-dlg-close aria-label="Close feedback">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
 
-    <form class="fb__body" id="fbForm" novalidate>
+    <form class="dlg__body" id="fbForm" novalidate>
       <p class="label fb__eyebrow">Feedback</p>
       <h2 class="display fb__title" id="fbTitle">Tell us straight.</h2>
       <p class="fb__intro" id="fbIntro">Short or long, rough or polished. We read all of it.</p>
@@ -48,17 +49,17 @@
 
       <p class="fb__err fb__err--send" id="fbSendErr" role="alert"></p>
       <div class="fb__actions">
-        <button class="btn btn--ghost" type="button" data-fb-close>Cancel</button>
+        <button class="btn btn--ghost" type="button" data-dlg-close>Cancel</button>
         <button class="btn btn--solid" type="submit" id="fbSubmit"><span class="fb__submit">Send feedback</span> <span class="btn__arrow">→</span></button>
       </div>
     </form>
 
-    <div class="fb__body fb__done" id="fbDone" hidden>
+    <div class="dlg__body fb__done" id="fbDone" hidden>
       <p class="fb__aside">thank you.</p>
       <h2 class="display fb__title" id="fbDoneTitle" tabindex="-1">Got it.</h2>
       <p class="fb__intro">It's with the people building Onextap. If you left an email, the reply comes from one of us.</p>
       <div class="fb__actions">
-        <button class="btn btn--solid" type="button" data-fb-close>Close</button>
+        <button class="btn btn--solid" type="button" data-dlg-close>Close</button>
       </div>
     </div>
   </div>

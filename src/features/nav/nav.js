@@ -91,6 +91,13 @@ export function initNav(opts) {
     target.focus({ preventScroll: true });
   });
 
+  // A button that opens a window (the header's Log in, which the open menu
+  // does not cover) takes over from the menu: the menu closes first, in the
+  // capture phase, so the window then holds the page as it finds it.
+  document.addEventListener('click', function (e) {
+    if (open && e.target.closest && e.target.closest('[aria-haspopup="dialog"]')) setOpen(false);
+  }, true);
+
   // Back from another page, the browser may hand this one back exactly as
   // it was left: with the menu still open over it, if a menu link led away.
   window.addEventListener('pageshow', function (e) { if (e.persisted) setOpen(false); });

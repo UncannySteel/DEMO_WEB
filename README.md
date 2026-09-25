@@ -52,6 +52,22 @@ Back button at the top: it goes back to wherever on the site the reader came
 from (the landing page puts them back where they left the story), or home if
 they arrived from outside. Contact has a feedback window (`features/feedback`).
 
+## The windows
+
+The site's pop-ups share one behaviour (`shared/lib/dialog.js`) and one
+shell (`shared/styles/dialog.css`): open, everything else is inert and the
+page is held still; Escape, the ×, or a click outside closes it and focus goes
+back to the button that opened it. There are three:
+
+| Window | Opened by | Where |
+| --- | --- | --- |
+| Sign-in | the header's **Log in** (`[data-login]`), on every page | `features/login` |
+| FAQ | the **FAQ** button in CH 05, "Get hired" (`[data-faq]`) | `features/faq` |
+| Feedback | any `[data-feedback]` button on Contact | `features/feedback` |
+
+A window's trigger carries `aria-haspopup="dialog"`; the menu closes itself
+when one is pressed, so a window never opens over the open menu.
+
 ## Structure
 
 ```
@@ -77,11 +93,13 @@ src/
       layout.css            chapter scaffolding (.ch, .ch__body, .wrap, .ch__head)
       buttons.css           .btn variants
       stage.css             the stage, layers, torn edge, the WebGL canvas
+      dialog.css            the pop-up windows' shell: scrim, window, bar, ×
     lib/
       motion.js             reduced-motion check, GSAP registration, Lenis smooth scroll
       reveal-headlines.js   masked headline words that rise on the timeline
       split-words.js        splits text into masked words
       dom.js                el() helper
+      dialog.js             pop-up window behaviour (inert page, focus, Escape)
     transitions/            cover / curtain, crumple / curl, blot (see table above)
     fx/
       fx.js                 the one WebGL canvas every effect draws into
@@ -105,12 +123,15 @@ src/
       demo-form.js            scroll-driven "typing" form
     job-boards/             CH 03 — two marquees of job boards
     pricing/                CH 04 — Free / Premium plans
-    closing/                CH 05 — citrine "Get hired." band
+    closing/                CH 05 — citrine "Get hired." band, with the FAQ button
     footer/
+    faq/                    the FAQ window (CH 05)
+    login/                  the sign-in window (the header's Log in)
     feedback/               the feedback window on Contact
 tests/
   stage.spec.js             the e2e checks (npm run test:e2e)
   pages.spec.js             the company pages, their nav, Back, and the feedback window
+  windows.spec.js           the FAQ and sign-in windows
   tour.mjs                  steps every transition at several sizes and saves frames to look at
 ```
 
@@ -133,6 +154,12 @@ adds its own animation once it has arrived and returns how long that takes.
   `src/features/feedback/feedback.js` takes a `send(note)` that returns a
   promise; until one is given, each note is only announced on the document
   as an `onextap:feedback` event.
+- **FAQ questions**: `src/features/faq/faq.html`, one `<details>` each.
+- **Where sign-in goes**: nowhere yet. `initLogin` in
+  `src/features/login/login.js` takes a `signIn({ method, mode, email,
+  password })` that returns a promise; until one is given, each attempt is
+  announced on the document as an `onextap:login` event (never with the
+  password) and counts as signed in.
 - **Pacing, order, or which transition joins two chapters**: `src/app/chapters.js`.
   Durations are in screens of scrolling.
 - **Add a section**: create `src/features/<name>/` with the three files (give

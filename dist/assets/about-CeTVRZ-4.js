@@ -1,4 +1,4 @@
-import"./hud-D7Brf-1V.js";import{b as s}from"./sub-page-Dh98efzl.js";const a=`<!-- ══ About ══ what Onextap is, and what it is not ═══════════════════ -->
+import"./login-Dkbvblsg.js";import{b as s}from"./sub-page-NtQbX8nA.js";const a=`<!-- ══ About ══ what Onextap is, and what it is not ═══════════════════ -->
 <section class="sub-hero" data-ground="ink">
   <div class="wrap">
     <a class="back" href="/" data-back><span class="back__arrow" aria-hidden="true">←</span> Back</a>

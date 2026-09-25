@@ -22,18 +22,20 @@ import { splitWords } from '../shared/lib/split-words.js';
 import * as cursor from '../features/cursor/cursor.js';
 import * as nav from '../features/nav/nav.js';
 import * as hud from '../features/hud/hud.js';
+import * as login from '../features/login/login.js';
 import pageFoot from './page-foot.html?raw';
 
 var HOME = '/';
 
 /* `features` are the page's own, keyed by their data-mount names. Returns
    `hold(on)`, for anything else that has to hold the page still while it is
-   open (the feedback window). */
+   open (the feedback window). The sign-in window is every page's. */
 export function bootSubPage(features) {
   mountFeatures(Object.assign({
     'cursor': cursor,
     'nav': nav,
     'hud': hud,
+    'login': login,
     'page-foot': { markup: pageFoot }
   }, features));
 
@@ -62,8 +64,10 @@ export function bootSubPage(features) {
     if (!lenis) return;
     if (on) lenis.stop(); else lenis.start();
   }
-  // The open menu holds the page still, as it does on the landing page.
+  // The open menu holds the page still, as it does on the landing page,
+  // and so does the sign-in window.
   navApi.onToggle(hold);
+  login.initLogin().onToggle(hold);
   return { hold: hold };
 }
 

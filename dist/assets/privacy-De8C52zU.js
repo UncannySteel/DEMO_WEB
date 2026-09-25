@@ -1,4 +1,4 @@
-import"./hud-D7Brf-1V.js";import{b as s}from"./sub-page-Dh98efzl.js";const a=`<!-- ══ Privacy ══ the line between the device and everything else ══════ -->
+import"./login-Dkbvblsg.js";import{b as s}from"./sub-page-NtQbX8nA.js";const a=`<!-- ══ Privacy ══ the line between the device and everything else ══════ -->
 <section class="sub-hero" data-ground="ink">
   <div class="wrap">
     <a class="back" href="/" data-back><span class="back__arrow" aria-hidden="true">←</span> Back</a>

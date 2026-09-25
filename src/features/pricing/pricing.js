@@ -7,7 +7,9 @@ export { markup };
 /* --- CH 04: the plans drift up under the headline ----------------------- */
 export function initPricing() {
   var words = headlineWords(document.querySelector('#price [data-split]'));
-  var plans = document.querySelectorAll('.plan');
+  // The slots, not the cards: GSAP pins a tweened element's independent
+  // `translate` to none inline, which would cancel the cards' hover lift.
+  var plans = document.querySelectorAll('.plans__slot');
   return {
     enter: function (tl, at) {
       riseWords(tl, words, at);
