@@ -11,11 +11,17 @@ export { markup };
    way. How the page gets there is given by setJump: on the stage every
    chapter sits at one place on screen, and only the stage knows where in
    the scroll each one is. Until then (no motion) the browser just follows
-   the anchor. Works with or without motion, like the header. */
-export function initNav() {
+   the anchor. Works with or without motion, like the header.
+
+   `opts.home` is for a page other than the landing page (the company pages,
+   src/pages/): the chapters all live back there, so every jump link goes
+   home to its chapter instead, and the landing page lands on it
+   (src/app/arrival.js). */
+export function initNav(opts) {
+  var home = opts && opts.home;
   var burger = document.getElementById('burger');
   var menu = document.getElementById('siteMenu');
-  var page = document.getElementById('stageTrack');
+  var page = document.querySelector('[data-page]');   // what the open menu covers
   var items = Array.prototype.slice.call(menu.querySelectorAll('.menu__list li'));
   var open = false, everOpened = false;
   var toggled = [], jump = null;
@@ -32,6 +38,14 @@ export function initNav() {
   });
 
   document.getElementById('menuYear').textContent = new Date().getFullYear();
+
+  // #top is the start of the story, which is just the landing page.
+  if (home) {
+    document.querySelectorAll('a[data-jump]').forEach(function (a) {
+      var hash = a.getAttribute('href');
+      if (hash.charAt(0) === '#') a.setAttribute('href', hash === '#top' ? home : home + hash);
+    });
+  }
 
   function setOpen(next) {
     if (next === open) return;
@@ -63,7 +77,9 @@ export function initNav() {
   document.addEventListener('click', function (e) {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;   // a new tab or window
     var link = e.target.closest && e.target.closest('a[data-jump]');
-    var target = link && document.querySelector(link.getAttribute('href'));
+    var href = link && link.getAttribute('href');
+    // A chapter on another page (see `home`) is an ordinary link there.
+    var target = href && href.charAt(0) === '#' && document.querySelector(href);
     if (!target) return;
     setOpen(false);            // hand the page back before moving it
     if (!jump) return;
@@ -74,6 +90,10 @@ export function initNav() {
     if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
     target.focus({ preventScroll: true });
   });
+
+  // Back from another page, the browser may hand this one back exactly as
+  // it was left: with the menu still open over it, if a menu link led away.
+  window.addEventListener('pageshow', function (e) { if (e.persisted) setOpen(false); });
 
   return {
     onToggle: function (fn) { toggled.push(fn); },

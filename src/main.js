@@ -15,6 +15,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { mountFeatures } from './app/mount.js';
 import { createStage } from './app/stage.js';
 import { pageChapters } from './app/chapters.js';
+import { initArrival } from './app/arrival.js';
 import { prefersReducedMotion, registerMotion, initSmoothScroll, scrollToTarget } from './shared/lib/motion.js';
 
 import * as cursor from './features/cursor/cursor.js';
@@ -84,11 +85,27 @@ if (prefersReducedMotion) {
   });
 
   // The open menu holds the page still. Its links land on the moment their
-  // chapter has arrived, with none of the story between played on the way.
+  // chapter has arrived, with none of the story between played on the way —
+  // and so does a company page's menu, linking back here to a chapter.
+  // Lenis clamps every scroll to the page height it last measured, which
+  // lags (debounced) behind a stage that has just laid out its track; on
+  // arriving from another page that cut the jump short, so it measures first.
+  var jumpTo = function (target) {
+    lenis.resize();
+    scrollToTarget(lenis, stage.scrollFor, target, true);
+  };
   navApi.onToggle(function (open) { if (open) lenis.stop(); else lenis.start(); });
-  navApi.setJump(function (target) { scrollToTarget(lenis, stage.scrollFor, target, true); });
+  navApi.setJump(jumpTo);
   hudApi.setOverlay(stage.groundAt);
   ScrollTrigger.refresh();
+
+  // In from another page: at a chapter (a company page's menu), or back to
+  // where the reader left the story.
+  initArrival({
+    stage: stage,
+    jump: jumpTo,
+    scrollTo: function (y) { lenis.resize(); lenis.scrollTo(y, { immediate: true, force: true }); }
+  });
 
   // The e2e tests read the stage's layout and drive the scroll from here
   // (dev server only; stripped from production builds).

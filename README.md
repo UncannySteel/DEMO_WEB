@@ -41,16 +41,35 @@ mark and wordmark) carry `data-jump`: they land on the moment their chapter
 has arrived in a single step, behind the still-open menu, so none of the story
 between is played on the way. Other in-page links still scroll through it.
 
+## The company pages
+
+The footer's About, Contact and Privacy links go to pages of their own
+(`/about/`, `/contact/`, `/privacy/`). They are ordinary scrolling pages, not
+stages, but they keep the landing page's cursor, nav spine, menu and header
+row. The menu's links there go back to the landing page and land on their
+chapter the way a jump does (`/#price`; `src/app/arrival.js`). Each page has a
+Back button at the top: it goes back to wherever on the site the reader came
+from (the landing page puts them back where they left the story), or home if
+they arrived from outside. Contact has a feedback window (`features/feedback`).
+
 ## Structure
 
 ```
 index.html                  page skeleton: <head>, fonts, the stage, one [data-mount] slot per feature
+about/ contact/ privacy/    the company pages' skeletons (index.html each)
+vite.config.js              the four HTML entries
 src/
   main.js                   imports shared CSS, mounts features, builds the stage
   app/
     mount.js                replaces each [data-mount] slot with that feature's markup
     stage.js                the sticky stage + scroll timeline, snapshots, anchors, rebuild on resize
     chapters.js             ← the page's running order and the transition into each chapter
+    arrival.js              landing on a chapter from another page (/#price), and back where you left
+  pages/                    the company pages
+    sub-page.js             what they share: nav, header row, Back, the entrance, smooth scroll
+    sub-page.css            the ink band, the chapter heads on oat, the foot
+    page-foot.html          the foot: the company pages, the way home, the mark
+    about/ contact/ privacy/  ← each page's copy (<name>.html) and entry script (<name>.js)
   shared/
     styles/
       tokens.css            colours, fonts, spacing (:root variables) — start here for theming
@@ -88,8 +107,10 @@ src/
     pricing/                CH 04 — Free / Premium plans
     closing/                CH 05 — citrine "Get hired." band
     footer/
+    feedback/               the feedback window on Contact
 tests/
   stage.spec.js             the e2e checks (npm run test:e2e)
+  pages.spec.js             the company pages, their nav, Back, and the feedback window
   tour.mjs                  steps every transition at several sizes and saves frames to look at
 ```
 
@@ -105,7 +126,13 @@ adds its own animation once it has arrived and returns how long that takes.
   "Autofill" live in `feature-showcase/features.data.js`.
 - **Colours / fonts**: `src/shared/styles/tokens.css`.
 - **Menu groups and links**: `src/features/nav/nav.html`. Each link's `href` is
-  a chapter's id; keep `data-jump` on it so it jumps rather than scrolls.
+  a chapter's id; keep `data-jump` on it so it jumps rather than scrolls. The
+  company pages rewrite them to `/#id` themselves.
+- **Company page copy**: `src/pages/<name>/<name>.html`.
+- **Where feedback goes**: nowhere yet. `initFeedback` in
+  `src/features/feedback/feedback.js` takes a `send(note)` that returns a
+  promise; until one is given, each note is only announced on the document
+  as an `onextap:feedback` event.
 - **Pacing, order, or which transition joins two chapters**: `src/app/chapters.js`.
   Durations are in screens of scrolling.
 - **Add a section**: create `src/features/<name>/` with the three files (give

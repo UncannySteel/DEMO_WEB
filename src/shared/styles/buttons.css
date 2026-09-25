@@ -8,7 +8,7 @@
 .btn:hover{transform:translateY(-2px)}
 .btn--solid{background:var(--ink);color:var(--bone)}
 .btn--solid:hover{background:var(--citrine);color:var(--ink)}
-.btn--ghost{border-color:var(--bone-line);color:var(--ink)}
+.btn--ghost{border-color:var(--bone-line);color:var(--ink);background:transparent}   /* a <button> has a fill of its own */
 .btn--ghost:hover{border-color:var(--ink)}
 .btn__arrow{transition:transform .3s cubic-bezier(.2,.8,.3,1)}
 .btn:hover .btn__arrow{transform:translateX(4px)}
